@@ -96,7 +96,7 @@ def crawler(index):
     # put url to queue
     date = "2020-02-02"
     index = list(index)
-    for i in index[:100]:
+    for i in index[:60]:
         master.put(i)
     date_info.put(date)
     # get result from queue
@@ -141,13 +141,6 @@ if __name__ == '__main__':
 
     crawler(index)
 
-    
-
-
-
-
-
-
 # # put task into the master queue
 # for i in range(10):
 #     master.put(i)
@@ -162,4 +155,6 @@ if __name__ == '__main__':
 #     r = worker.get()
 #     print(r)
 
+# afer the task queue is empty, delay a few second then shutdown
+time.sleep(5)
 manager.shutdown()

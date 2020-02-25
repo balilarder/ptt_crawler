@@ -35,13 +35,11 @@ def process(n):
 while not master.empty():
     url = master.get(timeout=100)
     # result.put((nn, ii, jj, candidates))
-    
-    # date = date_info.get(timeout=100)
-    # date_info.put(date)
-
+    date = date_info.get(timeout=100)
+    date_info.put(date)
     print(url)
-    # print(date)
-    time.sleep(1)
+    print(date)
+    time.sleep(1)  # because processing...
 print("master is empty")
         
  
