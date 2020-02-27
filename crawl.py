@@ -2,7 +2,7 @@ import requests
 from requests_html import HTML
 from datetime import datetime
 # date = "2014-02-24 2018-04-10" # example
-date = "2020-02-23 2020-02-26"
+date = "2020-02-24 2020-02-25"
 
 class BoardCrawler(object):
     def __init__(self, board):
@@ -16,12 +16,14 @@ class BoardCrawler(object):
         return response
     
     def parse_article(self, text):
+        """get a list of articles"""
         html = HTML(html = text)
         article_entries = html.find('div.r-ent')
 
         return article_entries
 
     def parse_article_data(self, entry):
+        """get information by each article"""
         info = {}
         info['title'] = entry.find('div.title', first = True).text
         info['category'] = self.board.split('/')[2]
@@ -39,6 +41,7 @@ class BoardCrawler(object):
         return parse
 
     def get_article_detail(self, link):
+        """enter an article to get the detail(content, push...)"""
         detail = {}
         url = 'https://www.ptt.cc' + link
         response = requests.get(url, cookies={'over18': '1'})
@@ -73,11 +76,7 @@ class BoardCrawler(object):
             return None
 
     def date_compare(self, date1, date2, data):
-        # return true or false
-        # print("check")
-        # print(data['title'], data['authorId'])
-        # print(date1, date2)
-
+        """return the action, whether the date in the segment"""
         k = data['publishedTime']
         format = k.split(' ')
         m, y, d = format[1], format[-1],format[2]
@@ -92,8 +91,13 @@ class BoardCrawler(object):
         elif x < d1:
             return -1
         
-        
-c = BoardCrawler("/bbs/Gossiping/index.html")
+def get_key(dict):
+    value = hash((dict['authorId'], dict['publishedTime'], dict['title']))
+    return(value, dict)
+
+# c = BoardCrawler("/bbs/Gossiping/index.html")
+c = BoardCrawler("/bbs/WomenTalk/index.html")
+
 response = c.fetch()
 
 
@@ -113,7 +117,9 @@ while go_to_previous_page:
         article = articles[start]
         
         data = c.parse_article_data(article)
-        if 'link' not in data:
+        # the article has been deleted
+        if data == {}:
+            start += 1
             continue
         date1, date2 = date.split(' ')[0], date.split(' ')[1]
         action = c.date_compare(date1, date2, data)
@@ -121,6 +127,10 @@ while go_to_previous_page:
             # crawl this article
             print(data['title'])
             print(data['publishedTime'])
+
+            key, entry = get_key(data)      # store in database
+            print(key, entry['title'])
+
         elif action == 0:
             if prevous != None:
                 c.board = prevous
@@ -142,41 +152,3 @@ while go_to_previous_page:
         c.board = prevous
         response = c.fetch()
         articles = c.parse_article(response.text)
-    # for a in articles:
-    #     data = c.parse_article_data(a)
-
-    #     date1, date2 = date.split(' ')[0], date.split(' ')[1]
-    #     action = c.date_compare(date1, date2, data)
-
-    #     if action == 1:
-    #         # report to server
-    #         pass
-    #     elif action == 0:
-
-
-        
-    #     article += 1
-    #     print(article)
-    #     # print(data)
-
-        
-    #     # if article >= 5:
-    #     #     enough_article = 1
-    #     #     break
-    
-    # pages += 1
-
-    # if prevous != None:
-    #     c.board = prevous
-    #     print(prevous)
-    #     response = c.fetch()
-    # else:
-    #     break
-
-
-    # if finish:
-    #     break
-    # if pages >= 3 or enough_article:
-        # break 
-
-    # print(data)
