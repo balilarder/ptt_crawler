@@ -49,8 +49,9 @@ class Node(object):
         return not(self == other)
 
 
-# get all categories from ptt
+
 def gen_all_board(start, end):
+    """# get all categories from ptt"""
     url = 'https://www.ptt.cc/cls/1'  # category  
     r = requests.get(url)  
     r.encoding = 'utf-8'
@@ -79,6 +80,7 @@ def gen_all_board(start, end):
 
 
 def get_child(node):
+    """parse the link in a given node, return a node (index or board class)"""
     url = 'https://www.ptt.cc' + str(node.url)
     r = requests.get(url)  
     r.encoding = 'utf-8'
@@ -97,19 +99,20 @@ def get_child(node):
 
 def crawler(index):
     workers = []
-    # put url to queue
-    date = "2020-02-02"
+    date = "2014-02-24 2018-4-10" # example
     index = list(index)
+
+    # choose some index to put into the task queue
     for i in index[:100]:
         master.put(i)
+
     date_info.put(date)
 
     while not master.empty():
-        print("get something from result")
+        print("\nget something from result and wirte to db")
         
         time.sleep(5)
         
-        print("surveillance")
         message = []
         while not information.empty():
             
@@ -121,14 +124,13 @@ def crawler(index):
         if error:
             print("workers are missing")
             print(error)
+        
             
 def surveillance(message, workers):
     # show surveillance message
-    print("show message")
     for m in message:
         pid = m[0]
         info = m[1]
-        print(pid, info)
     # reverse the list, find how many different workers, if find a new worker, append to workers
     filter = []
     catch_worker = []
@@ -138,8 +140,10 @@ def surveillance(message, workers):
             filter.append(i)
             catch_worker.append(i[0])
     
-    print(filter)       # message of surveillance!
-    print(catch_worker)
+    print("\nsurveillance message:")
+    # message of surveillance
+    for message in filter:
+        print(message)
     for w in catch_worker:
         if w not in workers:
             workers.append(w)
@@ -151,7 +155,6 @@ def surveillance(message, workers):
     return missing
 
 if __name__ == '__main__':
-    # main()
 
     my_file = Path("boards.pkl")
     if my_file.is_file():
@@ -173,20 +176,5 @@ if __name__ == '__main__':
     print("start to crawl")
     crawler(index)
 
-# # put task into the master queue
-# for i in range(10):
-#     master.put(i)
-
-
-# #...
-# # every 5 second, collect data, and show crawler's status:
-# # ex: cid1, has done x articles, cid2, has done x2 articles...
-
-
-# for i in range(10):
-#     r = worker.get()
-#     print(r)
-
-# afer the task queue is empty, delay a few second then shutdown
 time.sleep(5)
 manager.shutdown()
